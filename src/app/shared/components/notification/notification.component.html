@@ -1,0 +1,17 @@
+<!-- NotificationComponent template -->
+<!-- MIGRACIÓN: *ngSwitch → @switch, *ngIf → @if -->
+
+<div *ngIf="visible" class="notification notification--{{ type }}" (click)="dismiss()">
+
+  <!-- Icono según tipo — MIGRAR: *ngSwitch → @switch -->
+  <span [ngSwitch]="type">
+    <ng-container *ngSwitchCase="'success'">✅</ng-container>
+    <ng-container *ngSwitchCase="'error'">❌</ng-container>
+    <ng-container *ngSwitchCase="'warning'">⚠️</ng-container>
+    <ng-container *ngSwitchDefault>ℹ️</ng-container>
+  </span>
+
+  {{ message }}
+
+  <button class="notification__close" (click)="dismiss()">✕</button>
+</div>

@@ -1,0 +1,97 @@
+<!-- ProductDetailComponent template -->
+<!-- MIGRACIÓN PENDIENTE: *ngIf → @if, *ngSwitch → @switch -->
+
+<div class="main-content">
+
+  <!-- Loading — *ngIf (MIGRAR → @if) -->
+  <app-loading-spinner [visible]="isLoading" message="Cargando producto..."></app-loading-spinner>
+
+  <!-- Not found — *ngIf (MIGRAR → @if) -->
+  <div *ngIf="notFound && !isLoading" class="empty-state">
+    <div class="empty-state__icon">🔍</div>
+    <div class="empty-state__title">Producto no encontrado</div>
+    <div class="empty-state__subtitle">El producto que buscas no existe o ha sido eliminado.</div>
+    <button class="btn btn--primary" (click)="goBack()" style="margin-top:1rem;">
+      ← Volver al catálogo
+    </button>
+  </div>
+
+  <!-- Detalle del producto — *ngIf (MIGRAR → @if) -->
+  <div *ngIf="product && !isLoading" class="product-detail">
+
+    <button class="btn btn--secondary" (click)="goBack()" style="margin-bottom:1rem;">
+      ← Volver
+    </button>
+
+    <div class="product-detail__header">
+
+      <div class="product-detail__image">
+        <!-- Emoji por categoría — *ngSwitch (MIGRAR → @switch) -->
+        <span [ngSwitch]="product!.category">
+          <ng-container *ngSwitchCase="'electronica'">💻</ng-container>
+          <ng-container *ngSwitchCase="'ropa'">👕</ng-container>
+          <ng-container *ngSwitchCase="'hogar'">🏠</ng-container>
+          <ng-container *ngSwitchCase="'deporte'">⚽</ng-container>
+          <ng-container *ngSwitchCase="'libros'">📚</ng-container>
+          <ng-container *ngSwitchDefault>🛍️</ng-container>
+        </span>
+      </div>
+
+      <div class="product-detail__info">
+        <div class="product-detail__name">{{ product!.name }}</div>
+        <div class="product-detail__price">{{ product!.price | currencyEur }}</div>
+
+        <!-- Badge de stock — *ngSwitch (MIGRAR → @switch) -->
+        <div [ngSwitch]="stockStatus">
+          <span *ngSwitchCase="'available'" class="product-detail__badge product-detail__badge--available">
+            ✅ {{ stockLabel }}
+          </span>
+          <span *ngSwitchCase="'low'" class="product-detail__badge product-detail__badge--low">
+            ⚠️ {{ stockLabel }}
+          </span>
+          <span *ngSwitchCase="'out'" class="product-detail__badge product-detail__badge--out">
+            ❌ {{ stockLabel }}
+          </span>
+        </div>
+
+        <p style="margin: 1rem 0; color:#555; line-height:1.6;">
+          {{ product!.description }}
+        </p>
+
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+          <span style="font-size:1.2rem;">⭐</span>
+          <strong>{{ product!.rating }}</strong>
+          <span style="color:#999;">({{ product!.reviews }} reseñas)</span>
+        </div>
+
+        <!-- Controles de cantidad — *ngIf (MIGRAR → @if) -->
+        <div *ngIf="product!.stock > 0" style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem;">
+          <label><strong>Cantidad:</strong></label>
+          <input
+            type="number"
+            [(ngModel)]="quantity"
+            [min]="1"
+            [max]="product!.stock"
+            style="width:80px; padding:0.5rem; border:1px solid #ccc; border-radius:4px;"
+          />
+        </div>
+
+        <!-- Botón añadir — estado dinámico con *ngIf (MIGRAR → @if) -->
+        <button
+          class="btn btn--success"
+          [disabled]="product!.stock === 0"
+          (click)="addToCart()"
+          *ngIf="!addedToCart"
+        >
+          🛒 Añadir al carrito
+        </button>
+
+        <button class="btn btn--success" disabled *ngIf="addedToCart">
+          ✅ ¡Añadido!
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+</div>

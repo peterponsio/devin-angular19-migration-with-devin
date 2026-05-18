@@ -1,0 +1,103 @@
+<!-- ProductListComponent template -->
+<!-- MIGRACIÓN PENDIENTE: *ngIf → @if, *ngFor → @for -->
+
+<div class="main-content">
+
+  <!-- Cabecera con búsqueda y filtros -->
+  <div style="display:flex; gap:1rem; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <h1 style="flex:1; color:#1A4A8C;">Catálogo de Productos</h1>
+
+    <input
+      type="text"
+      placeholder="Buscar productos..."
+      [(ngModel)]="searchTerm"
+      (keyup.enter)="onSearch()"
+      style="padding:0.5rem 1rem; border:1px solid #ccc; border-radius:4px; min-width:200px;"
+    />
+
+    <select
+      [(ngModel)]="selectedCategory"
+      (change)="onCategoryChange(selectedCategory)"
+      style="padding:0.5rem; border:1px solid #ccc; border-radius:4px;"
+    >
+      <option *ngFor="let cat of categories" [value]="cat.value">
+        {{ cat.label }}
+      </option>
+    </select>
+
+    <button class="btn btn--primary" (click)="onSearch()">Buscar</button>
+  </div>
+
+  <!-- Loading spinner — usa *ngIf (MIGRAR → @if) -->
+  <app-loading-spinner [visible]="isLoading" message="Cargando productos..."></app-loading-spinner>
+
+  <!-- Mensaje de error — *ngIf (MIGRAR → @if) -->
+  <div *ngIf="errorMessage" class="notification notification--error" style="position:static; margin-bottom:1rem;">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Estado vacío — *ngIf (MIGRAR → @if) -->
+  <div *ngIf="!isLoading && products.length === 0 && !errorMessage" class="empty-state">
+    <div class="empty-state__icon">🔍</div>
+    <div class="empty-state__title">Sin resultados</div>
+    <div class="empty-state__subtitle">No se encontraron productos con esos criterios</div>
+  </div>
+
+  <!-- Grid de productos — *ngFor + *ngIf (MIGRAR → @for + @if) -->
+  <div class="product-grid" *ngIf="!isLoading && products.length > 0">
+
+    <div class="product-card" *ngFor="let product of products; trackBy: trackByProductId">
+
+      <div class="product-card__image">
+        <!-- Emoji según categoría — *ngSwitch (MIGRAR → @switch) -->
+        <span [ngSwitch]="product.category">
+          <ng-container *ngSwitchCase="'electronica'">💻</ng-container>
+          <ng-container *ngSwitchCase="'ropa'">👕</ng-container>
+          <ng-container *ngSwitchCase="'hogar'">🏠</ng-container>
+          <ng-container *ngSwitchCase="'deporte'">⚽</ng-container>
+          <ng-container *ngSwitchCase="'libros'">📚</ng-container>
+          <ng-container *ngSwitchDefault>🛍️</ng-container>
+        </span>
+      </div>
+
+      <div class="product-card__body">
+        <div class="product-card__name">{{ product.name }}</div>
+        <div class="product-card__price">{{ product.price | currencyEur }}</div>
+
+        <!-- Stock badge — *ngIf (MIGRAR → @if) -->
+        <div
+          class="product-card__stock"
+          [class.product-card__stock--out]="product.stock === 0"
+        >
+          <span *ngIf="product.stock > 10">✅ En stock</span>
+          <span *ngIf="product.stock > 0 && product.stock <= 10">
+            ⚠️ Últimas {{ product.stock }} unidades
+          </span>
+          <span *ngIf="product.stock === 0">❌ Sin stock</span>
+        </div>
+
+        <div class="product-card__actions">
+          <button
+            class="btn btn--primary"
+            [disabled]="product.stock === 0"
+            (click)="addToCart(product)"
+          >
+            🛒 Añadir
+          </button>
+          <a [routerLink]="['/products', product.id]" class="btn btn--secondary">
+            Ver detalle
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Notificación flotante -->
+  <app-notification
+    [message]="notificationMessage"
+    [type]="notificationType"
+    [duration]="2500"
+  ></app-notification>
+
+</div>

@@ -1,0 +1,36 @@
+{
+  "repo_notes": "Proyecto de práctica Angular 19 → 21 para el curso de Devin AI de Softtek. Contiene intencionalmente patrones de Angular 19 que deben migrarse: NgModules (AppModule, CoreModule, SharedModule, ProductsModule, CartModule), directivas estructurales (*ngIf, *ngFor, *ngSwitch) y BehaviorSubject en servicios de estado. El objetivo es practicar la migración a Angular 21 con Devin: standalone components, nueva sintaxis de control flow (@if/@for/@switch) y Signals.",
+
+  "pages": [
+    {
+      "title": "Arquitectura General",
+      "path": "/",
+      "page_notes": "Describe la estructura completa del proyecto: feature modules (products, cart), shared module, core module con servicios singleton. Explica el flujo de datos: ProductService (HttpClient/Observable) → ProductListComponent → CartService (BehaviorSubject) → AppComponent. Los módulos usan lazy loading desde AppRoutingModule."
+    },
+    {
+      "title": "Módulos NgModule (targets de migración)",
+      "path": "/src/app",
+      "page_notes": "Los 5 NgModules del proyecto son los candidatos principales a eliminar. AppModule: módulo raíz con BrowserModule y bootstrap. CoreModule: guard singleton con @SkipSelf. SharedModule: barrel de componentes y pipes compartidos. ProductsModule y CartModule: feature modules con lazy loading y RouterModule.forChild(). Cada módulo tiene comentarios JSDoc explicando su equivalente en Angular 21."
+    },
+    {
+      "title": "Servicios y Estado Reactivo",
+      "path": "/src/app/core/services",
+      "page_notes": "CartService y AuthService usan BehaviorSubject para gestionar estado reactivo. Ambos exponen Observables públicos (cart$, user$, totalItems$) que los componentes consumen con async pipe o subscribe(). El patrón de migración a Angular 21 es: BehaviorSubject → signal(), Observable computed → computed(), subscribe/async pipe → acceso directo a la señal en template. Los comentarios en el código muestran el equivalente exacto en signals."
+    },
+    {
+      "title": "Templates con Directivas Estructurales",
+      "path": "/src/app/features",
+      "page_notes": "Los templates de los feature components contienen los patrones a migrar. ProductListComponent: *ngFor para el grid de productos, *ngIf para loading/empty/error states, *ngSwitch para emojis de categoría. ProductDetailComponent: *ngSwitch para estado de stock y emoji, *ngIf para controles de cantidad y botón dinámico. CartComponent: *ngFor para tabla de items, *ngIf para estado vacío. CheckoutComponent: múltiples *ngIf para el wizard de 3 pasos (form/confirm/success). Cada directiva tiene comentario '// MIGRAR →' con la sintaxis equivalente."
+    },
+    {
+      "title": "Guard de Autenticación",
+      "path": "/src/app/core/guards",
+      "page_notes": "AuthGuard implementa CanActivate como clase con @Injectable. Protege la ruta /cart/checkout. La migración a Angular 21 consiste en reemplazarlo por una función arrow exportada (CanActivateFn) que usa inject() en lugar de constructor injection. El código del guard incluye el ejemplo completo de la función equivalente en comentarios."
+    },
+    {
+      "title": "Pipe Personalizado",
+      "path": "/src/app/shared/pipes",
+      "page_notes": "CurrencyEurPipe formatea precios en euros usando Intl.NumberFormat con locale es-ES. Está declarado en SharedModule (patrón Angular 19). La migración añade standalone: true y lo elimina de SharedModule para que cada componente lo importe directamente."
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+<!-- AppComponent template -->
+<!-- MIGRACIÓN PENDIENTE: *ngIf → @if, async pipe → signal() -->
+
+<nav class="navbar">
+  <a class="navbar__brand" routerLink="/products">🛍️ Softtek Shop</a>
+
+  <ul class="navbar__links">
+    <li><a routerLink="/products" routerLinkActive="active">Productos</a></li>
+    <li><a routerLink="/cart" routerLinkActive="active">
+      🛒 Carrito
+      <!-- Badge de cantidad — *ngIf (MIGRAR → @if) -->
+      <span *ngIf="(totalItems$ | async) as total">
+        <span *ngIf="total > 0"
+              style="background:#c62828; color:white; border-radius:50%; padding:0 6px; font-size:0.75rem; margin-left:4px;">
+          {{ total }}
+        </span>
+      </span>
+    </a></li>
+  </ul>
+
+  <div class="navbar__user">
+    <!-- Usuario logueado — *ngIf (MIGRAR → @if) -->
+    <ng-container *ngIf="user$ | async as user; else loginLink">
+      <span>👤 {{ user.name }}</span>
+      <button
+        class="btn btn--secondary"
+        (click)="logout()"
+        style="padding:0.3rem 0.8rem; font-size:0.8rem; margin-left:0.5rem;"
+      >
+        Salir
+      </button>
+    </ng-container>
+    <ng-template #loginLink>
+      <a routerLink="/login" style="color:white; font-size:0.9rem;">Iniciar sesión</a>
+    </ng-template>
+  </div>
+</nav>
+
+<router-outlet></router-outlet>
