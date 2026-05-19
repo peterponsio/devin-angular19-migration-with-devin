@@ -1,11 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Product, ProductFilter } from '../../models/product.model';
 import { environment } from '../../../environments/environment';
 
-// Datos mock — en producción vendrían de environment.apiUrl
 const MOCK_PRODUCTS: Product[] = [
   {
     id: 1,
@@ -80,13 +79,8 @@ const MOCK_PRODUCTS: Product[] = [
 })
 export class ProductService {
   private readonly apiUrl = `${environment.apiUrl}/products`;
+  private readonly http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
-
-  /**
-   * Devuelve todos los productos.
-   * En producción: this.http.get<Product[]>(this.apiUrl)
-   */
   getProducts(filter?: ProductFilter): Observable<Product[]> {
     let products = [...MOCK_PRODUCTS];
 
@@ -107,13 +101,9 @@ export class ProductService {
       products = products.filter(p => p.price <= filter.maxPrice!);
     }
 
-    // Simula latencia de red
     return of(products).pipe(delay(400));
   }
 
-  /**
-   * Devuelve un producto por ID.
-   */
   getProductById(id: number): Observable<Product | undefined> {
     const product = MOCK_PRODUCTS.find(p => p.id === id);
     return of(product).pipe(delay(300));

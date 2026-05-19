@@ -1,20 +1,17 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
-/**
- * LoadingSpinnerComponent — Angular 19 (MIGRAR → standalone en Angular 21)
- *
- * OBJETIVO DE MIGRACIÓN:
- *   @Component({ standalone: true, imports: [CommonModule], ... })
- *   Eliminar de SharedModule.declarations y SharedModule.exports
- */
 @Component({
   selector: 'app-loading-spinner',
+  standalone: true,
   template: `
-    <div class="spinner-overlay" *ngIf="visible">
-      <div class="spinner"></div>
-      <p *ngIf="message" class="spinner-message">{{ message }}</p>
-    </div>
+    @if (visible) {
+      <div class="spinner-overlay">
+        <div class="spinner"></div>
+        @if (message) {
+          <p class="spinner-message">{{ message }}</p>
+        }
+      </div>
+    }
   `,
   styles: [`
     .spinner-message {
@@ -23,7 +20,6 @@ import { CommonModule } from '@angular/common';
       font-weight: 600;
     }
   `],
-  standalone: false
 })
 export class LoadingSpinnerComponent {
   @Input() visible = false;

@@ -1,28 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs/operators';
 import { Product } from '../../../models/product.model';
 import { ProductService } from '../../../core/services/product.service';
 import { CartService } from '../../../core/services/cart.service';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { CurrencyEurPipe } from '../../../shared/pipes/currency-eur.pipe';
 
 type StockStatus = 'available' | 'low' | 'out';
 
-/**
- * ProductDetailComponent — Angular 19 (MIGRAR en Angular 21)
- *
- * PROBLEMAS:
- *   1. Declarado en ProductsModule (no standalone)
- *   2. Template usa *ngIf y *ngSwitch
- *
- * OBJETIVOS DE MIGRACIÓN (Angular 21):
- *   1. standalone: true
- *   2. *ngIf   → @if
- *   3. *ngSwitch → @switch
- */
 @Component({
   selector: 'app-product-detail',
+  standalone: true,
+  imports: [FormsModule, RouterModule, LoadingSpinnerComponent, CurrencyEurPipe],
   templateUrl: './product-detail.component.html',
-  standalone: false
 })
 export class ProductDetailComponent implements OnInit {
   product: Product | null = null;
@@ -31,12 +23,10 @@ export class ProductDetailComponent implements OnInit {
   quantity = 1;
   addedToCart = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private productService: ProductService,
-    private cartService: CartService
-  ) { }
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly productService = inject(ProductService);
+  private readonly cartService = inject(CartService);
 
   ngOnInit(): void {
     this.route.paramMap
