@@ -1,44 +1,34 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Cart } from '../../../models/cart.model';
+import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { CurrencyEurPipe } from '../../../shared/pipes/currency-eur.pipe';
 
 type CheckoutStep = 'form' | 'confirm' | 'success';
 
-/**
- * CheckoutComponent — Angular 19 (MIGRAR en Angular 21)
- *
- * PROBLEMAS:
- *   1. Declarado en CartModule (no standalone)
- *   2. Template usa múltiples *ngIf para gestionar pasos del wizard
- *   3. Suscripción a cart$ con subscribe()
- *
- * OBJETIVOS DE MIGRACIÓN (Angular 21):
- *   1. standalone: true
- *   2. currentStep y cart como signals
- *   3. *ngIf múltiples → @if / @else en el template
- */
 @Component({
   selector: 'app-checkout',
+  standalone: true,
+  imports: [ReactiveFormsModule, LoadingSpinnerComponent, CurrencyEurPipe],
   templateUrl: './checkout.component.html',
-  standalone: false
 })
 export class CheckoutComponent implements OnInit {
-  cart: Cart | null = null;
   currentStep: CheckoutStep = 'form';
   isProcessing = false;
   orderId = '';
 
   checkoutForm: FormGroup;
 
-  constructor(
-    private fb: FormBuilder,
-    private cartService: CartService,
-    private authService: AuthService,
-    private router: Router
-  ) {
+  private readonly fb = inject(FormBuilder);
+  private readonly cartService = inject(CartService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+
+  readonly cart = this.cartService.cart;
+
+  constructor() {
     this.checkoutForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
@@ -50,19 +40,14 @@ export class CheckoutComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Suscripción explícita — MIGRAR → toSignal()
-    this.cartService.cart$.subscribe(cart => {
-      this.cart = cart;
-      // Pre-rellenar email del usuario logueado
-      const user = this.authService.currentUser;
-      if (user) {
-        this.checkoutForm.patchValue({ name: user.name, email: user.email });
-      }
-    });
+    const user = this.authService.currentUser;
+    if (user) {
+      this.checkoutForm.patchValue({ name: user.name, email: user.email });
+    }
   }
 
   get isCartEmpty(): boolean {
-    return !this.cart || this.cart.items.length === 0;
+    return this.cart().items.length === 0;
   }
 
   submitOrder(): void {
@@ -73,7 +58,6 @@ export class CheckoutComponent implements OnInit {
   confirmOrder(): void {
     this.isProcessing = true;
 
-    // Simula llamada a API
     setTimeout(() => {
       this.orderId = `ORD-${Date.now()}`;
       this.cartService.clearCart();
